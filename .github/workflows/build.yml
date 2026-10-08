@@ -1,0 +1,21 @@
+name: build
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet build ConsoleApp1.csproj
+      - name: Smoke test
+        run: |
+          printf 'abc\n6\nx\n*\n7\n' | dotnet run --project ConsoleApp1.csproj --no-build | tee out.txt
+          grep -q 'Result: 6 \* 7 = 42' out.txt
+          printf '1\n/\n0\n' | dotnet run --project ConsoleApp1.csproj --no-build | grep -q 'Cannot divide by zero'
